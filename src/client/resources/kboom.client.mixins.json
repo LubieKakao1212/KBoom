@@ -1,9 +1,9 @@
 {
 	"required": true,
-	"package": "com.lubiekakao1212.kaboooom.mixin",
+	"package": "com.lubiekakao1212.kboom.mixin.client",
 	"compatibilityLevel": "JAVA_17",
-	"mixins": [
-		"ExampleMixin"
+	"client": [
+		"ExampleClientMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

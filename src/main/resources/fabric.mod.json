@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-	"id": "kaboooom",
+	"id": "kboom",
 	"version": "${version}",
-	"name": "Persistent Players",
+	"name": "K-Boom",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
 		"Me!"
@@ -16,16 +16,16 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.lubiekakao1212.kaboooom.PersistentPlayers"
+			"com.lubiekakao1212.kboom.KBoomCommon"
 		],
 		"client": [
-			"com.lubiekakao1212.kaboooom.PersistentPlayersClient"
+			"com.lubiekakao1212.kboom.KBoomClient"
 		]
 	},
 	"mixins": [
-		"kaboooom.mixins.json",
+		"kboom.mixins.json",
 		{
-			"config": "kaboooom.client.mixins.json",
+			"config": "kboom.client.mixins.json",
 			"environment": "client"
 		}
 	],

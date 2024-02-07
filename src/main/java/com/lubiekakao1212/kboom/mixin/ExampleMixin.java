@@ -1,4 +1,4 @@
-package com.lubiekakao1212.kaboooom.mixin;
+package com.lubiekakao1212.kboom.mixin;
 
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
