@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "kaboooom",
+	"version": "${version}",
+	"name": "Persistent Players",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/kaboooom/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.lubiekakao1212.kaboooom.PersistentPlayers"
+		],
+		"client": [
+			"com.lubiekakao1212.kaboooom.PersistentPlayersClient"
+		]
+	},
+	"mixins": [
+		"kaboooom.mixins.json",
+		{
+			"config": "kaboooom.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.15.6",
+		"minecraft": "~1.19.4",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
