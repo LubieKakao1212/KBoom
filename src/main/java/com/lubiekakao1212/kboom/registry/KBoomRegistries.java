@@ -24,4 +24,11 @@ public class KBoomRegistries {
         Registry.register(EXPLOSION_SOURCES, new Identifier("minecraft","explosion"), ExplosionTypeSource.defaultFor(EntityExplosion.class));
     }
 
+    public static class EntryIds {
+        public static final Identifier EXPLOSION_BASIC = new Identifier("minecraft:explosion");
+        public static final Identifier EXPLOSION_MOB = new Identifier("minecraft:explosion-mob");
+        public static final Identifier EXPLOSION_TNT = new Identifier("minecraft:explosion-tnt");
+        public static final Identifier EXPLOSION_BLOCK = new Identifier("minecraft:explosion-block");
+    }
+
 }
