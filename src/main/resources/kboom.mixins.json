@@ -3,7 +3,7 @@
 	"package": "com.lubiekakao1212.kboom.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"ExampleMixin"
+      "WorldMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
