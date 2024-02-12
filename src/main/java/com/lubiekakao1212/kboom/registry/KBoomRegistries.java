@@ -1,6 +1,7 @@
 package com.lubiekakao1212.kboom.registry;
 
 import com.lubiekakao1212.kboom.KBoom;
+import com.lubiekakao1212.kboom.explosions.impl.DeleteSphereExplosion;
 import com.lubiekakao1212.kboom.explosions.impl.EntityExplosion;
 import com.lubiekakao1212.kboom.explosions.ExplosionTypeSource;
 import com.lubiekakao1212.kboom.explosions.impl.MultiExplosion;
@@ -22,8 +23,12 @@ public class KBoomRegistries {
             .buildAndRegister();
 
     public static void init() {
+        //Temporary
         Registry.register(EXPLOSION_SOURCES, new Identifier("minecraft","explosion"), ExplosionTypeSource.defaultFor(EntityExplosion.class));
+
+        Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","entity"), ExplosionTypeSource.defaultFor(EntityExplosion.class));
         Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","multi-explosion"), ExplosionTypeSource.defaultFor(MultiExplosion.class));
+        Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","delete-sphere"), ExplosionTypeSource.defaultFor(DeleteSphereExplosion.class));
     }
 
     public static class EntryIds {

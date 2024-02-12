@@ -1,11 +1,14 @@
 package com.lubiekakao1212.kboom.resource;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.lubiekakao1212.kboom.KBoom;
 import com.lubiekakao1212.kboom.explosions.IExplosionType;
 import com.lubiekakao1212.kboom.registry.KBoomRegistries;
+import com.lubiekakao1212.kboom.util.DependencyUtil;
+import com.mojang.datafixers.types.Func;
 import net.fabricmc.fabric.api.resource.SimpleResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
@@ -15,10 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import static com.lubiekakao1212.kboom.resource.KBoomConstants.*;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -85,8 +85,7 @@ public class ExplosionTypeManager implements SimpleResourceReloadListener<Explos
     public CompletableFuture<Void> apply(LoadedData data, ResourceManager manager, Profiler profiler, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             var explosionSourcesReg = KBoomRegistries.EXPLOSION_SOURCES;
-            Map<Identifier, IExplosionType> newTypes = new HashMap<>();
-
+            ImmutableMap.Builder<Identifier, IExplosionType> newTypesBuilder = ImmutableMap.builder();
             for(var res : data.resources.entrySet()) {
                 var json = res.getValue();
                 var id = res.getKey();
@@ -105,14 +104,21 @@ public class ExplosionTypeManager implements SimpleResourceReloadListener<Explos
                 }
                 var explosion = source.createExplosionType(json);
                 explosion.initialize();
-                newTypes.put(id, explosion);
+                newTypesBuilder.put(id, explosion);
+            }
+
+            var newTypes = newTypesBuilder.build();
+
+            for(var id : DependencyUtil.dependencySort(newTypes.keySet(), (element) -> Objects.requireNonNull(newTypes.get(element)).getDependencies())) {
+                Objects.requireNonNull(newTypes.get(id)).loadDependencies(newTypes);
             }
 
             explosionTypes = newTypes;
-
             return null;
         }, executor);
     }
+
+
 
     @Nullable
     public IExplosionType get(Identifier identifier) {

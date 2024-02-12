@@ -1,5 +1,7 @@
 package com.lubiekakao1212.kboom.explosions.impl;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.lubiekakao1212.kboom.explosions.ExplosionProperties;
 import com.lubiekakao1212.kboom.explosions.ExplosionTypeSource;
@@ -25,7 +27,6 @@ public class MultiExplosion implements IExplosionType {
 
     @Override
     public void explode(ServerWorld world, Vector3d position, ExplosionProperties props) {
-        ensureInitialized();
         props = overrides.apply(props);
         for(var explosion : subExplosions) {
             explosion.explode(world, position, props);
@@ -34,8 +35,8 @@ public class MultiExplosion implements IExplosionType {
 
     /**
      * Finalizes and validates its data after deserialization
-     *
      * @throws IllegalArgumentException when given instance has corrupted data
+     * @implNote Don't load ExplosionTypes in this method, instead use {@linkplain IExplosionType#loadDependencies(ImmutableMap)} ()} together with {@link #getDependencies()}
      */
     @Override
     public void initialize() {
@@ -50,18 +51,20 @@ public class MultiExplosion implements IExplosionType {
         }*/
     }
 
-    @Deprecated(forRemoval = true, since = "Temporary")
-    private void ensureInitialized() {
-        if(!subExplosions.isEmpty()) {
-            return;
-        }
+    @Override
+    public List<Identifier> getDependencies() {
+        return subExplosionIds;
+    }
+
+    @Override
+    public void loadDependencies(ImmutableMap<Identifier, IExplosionType> registry) {
         for(var id : subExplosionIds) {
-            var explosion = KBoomRegistries.EXPLOSIONS.get(id);
-            if(explosion == null) {
+            var explosion = registry.get(id);
+            //No need for null check, we are ensured by the dependency sorter that this is correct
+            /*if(explosion == null) {
                 throw new IllegalArgumentException("Invalid explosion type: " + id);
-            }
+            }*/
             subExplosions.add(explosion);
         }
     }
-
 }
