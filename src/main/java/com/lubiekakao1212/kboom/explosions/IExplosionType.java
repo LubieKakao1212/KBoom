@@ -5,7 +5,7 @@ import org.joml.Vector3d;
 
 public interface IExplosionType {
 
-    void explode(ServerWorld world, Vector3d position);
+    void explode(ServerWorld world, Vector3d position, ExplosionProperties props);
 
     /**
      * Finalizes and validates its data after deserialization

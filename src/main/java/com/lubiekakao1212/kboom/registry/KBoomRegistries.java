@@ -1,8 +1,9 @@
 package com.lubiekakao1212.kboom.registry;
 
 import com.lubiekakao1212.kboom.KBoom;
-import com.lubiekakao1212.kboom.explosions.EntityExplosion;
+import com.lubiekakao1212.kboom.explosions.impl.EntityExplosion;
 import com.lubiekakao1212.kboom.explosions.ExplosionTypeSource;
+import com.lubiekakao1212.kboom.explosions.impl.MultiExplosion;
 import com.lubiekakao1212.kboom.resource.ExplosionTypeManager;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
@@ -22,6 +23,7 @@ public class KBoomRegistries {
 
     public static void init() {
         Registry.register(EXPLOSION_SOURCES, new Identifier("minecraft","explosion"), ExplosionTypeSource.defaultFor(EntityExplosion.class));
+        Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","multi-explosion"), ExplosionTypeSource.defaultFor(MultiExplosion.class));
     }
 
     public static class EntryIds {

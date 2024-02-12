@@ -1,7 +1,7 @@
 package com.lubiekakao1212.kboom.mixin;
 
 import com.lubiekakao1212.kboom.KBoom;
-import com.lubiekakao1212.kboom.explosions.IExplosionPowerOverride;
+import com.lubiekakao1212.kboom.explosions.ExplosionProperties;
 import com.lubiekakao1212.kboom.registry.KBoomRegistries;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
@@ -38,13 +38,8 @@ public class WorldMixin {
 		if(explosion == null) {
 			KBoom.LOGGER.warn("Explosion not found: " + exploionId);
 		} else {
-			if(explosion instanceof IExplosionPowerOverride advExpl)
-			{
-				advExpl.explode((ServerWorld) entity.getWorld(), new Vector3d(x, y, z), power);
-			}
-			else {
-				explosion.explode((ServerWorld) entity.getWorld(), new Vector3d(x, y, z));
-			}
+			var props = new ExplosionProperties(power, createFire, entity, damageSource, behavior);
+			explosion.explode((ServerWorld) entity.getWorld(), new Vector3d(x, y, z), props);
 		}
 
 		var world = (World)(Object)this;
