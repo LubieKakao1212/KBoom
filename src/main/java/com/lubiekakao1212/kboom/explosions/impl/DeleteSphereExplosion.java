@@ -12,6 +12,8 @@ import org.joml.Vector3d;
 
 import java.util.*;
 
+import static com.lubiekakao1212.kboom.util.ExplosionUtil.*;
+
 public class DeleteSphereExplosion implements IExplosionType {
 
     private ExplosionProperties.Overrides overrides;
@@ -64,12 +66,7 @@ public class DeleteSphereExplosion implements IExplosionType {
         }
     }
 
-    private void addNotPresent(Queue<BlockPos> target, Set<BlockPos> elements, BlockPos pos) {
-        if(!elements.contains(pos)) {
-            target.add(pos);
-            elements.add(pos);
-        }
-    }
+
 
 
     /**

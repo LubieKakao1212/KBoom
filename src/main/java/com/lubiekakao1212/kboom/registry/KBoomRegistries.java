@@ -5,6 +5,7 @@ import com.lubiekakao1212.kboom.explosions.impl.DeleteSphereExplosion;
 import com.lubiekakao1212.kboom.explosions.impl.EntityExplosion;
 import com.lubiekakao1212.kboom.explosions.ExplosionTypeSource;
 import com.lubiekakao1212.kboom.explosions.impl.MultiExplosion;
+import com.lubiekakao1212.kboom.explosions.impl.RaySphereExplosion;
 import com.lubiekakao1212.kboom.resource.ExplosionTypeManager;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
@@ -29,6 +30,7 @@ public class KBoomRegistries {
         Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","entity"), ExplosionTypeSource.defaultFor(EntityExplosion.class));
         Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","multi-explosion"), ExplosionTypeSource.defaultFor(MultiExplosion.class));
         Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","delete-sphere"), ExplosionTypeSource.defaultFor(DeleteSphereExplosion.class));
+        Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","ray-sphere"), ExplosionTypeSource.defaultFor(RaySphereExplosion.class));
     }
 
     public static class EntryIds {
