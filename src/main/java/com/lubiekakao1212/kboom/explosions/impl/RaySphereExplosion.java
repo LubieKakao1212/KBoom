@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.annotations.SerializedName;
 import com.lubiekakao1212.kboom.explosions.ExplosionProperties;
 import com.lubiekakao1212.kboom.explosions.IExplosionType;
-import com.lubiekakao1212.qulib.math.extensions.Vector3dExtensionsKt;
 import com.lubiekakao1212.qulib.raycast.RaycastUtilKt;
-import it.unimi.dsi.fastutil.io.FastBufferedInputStream;
-import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -26,7 +23,7 @@ public class RaySphereExplosion implements IExplosionType {
     private float penetration = 1f;
 
     @SerializedName("natural-decay")
-    private float naturalDecay = 1f / 128f;
+    private float naturalDecay = 1f / 16f;
 
     @SerializedName("drop-chance")
     private float dropChance = 0f;
@@ -46,15 +43,21 @@ public class RaySphereExplosion implements IExplosionType {
 
         var destroyedBlocks = new HashMap<BlockPos, Double>();
 
+
         for(var dir : randomizeRays()) {
             double[] rayPower = new double[] { props.power() };
             //Find a better algorithm
             rayPower[0] = random.nextDouble(Math.max(rayPower[0] - randomness, 0), rayPower[0] + randomness);
 
             RaycastUtilKt.raycastGridUntil(position, dir, Double.POSITIVE_INFINITY, true, (hit) -> {
+                var pos = hit.component2();
+
+                if(pos.y < world.getBottomY() || pos.y > world.getTopY()) {
+                    return false;
+                }
+
                 var intersection = hit.component1();
                 var intersectionDistance = intersection.getDistanceMax() - intersection.getDistanceMin();
-                var pos = hit.component2();
                 var bPos = new BlockPos(pos.x, pos.y, pos.z);
                 var resistanceTotal = world.getBlockState(bPos).getBlock().getBlastResistance();
                 var resistanceScaled = resistanceTotal * intersectionDistance;
@@ -62,7 +65,8 @@ public class RaySphereExplosion implements IExplosionType {
                 var damage = intersectionDistance * rayPower[0];
                 rayPower[0] -= resistanceScaled / penetration;
                 if(rayPower[0] <= 0) {
-                    //ray power is negative so we add instead of subtracting
+                    //we want to offset tha damage dealt by the overused power
+                    //ray power is negative, so we add instead of subtracting
                     damage += rayPower[0];
                 }
 
@@ -74,7 +78,6 @@ public class RaySphereExplosion implements IExplosionType {
 
                 return rayPower[0] > 0;
             });
-
         }
 
         for (var blockEntry : destroyedBlocks.entrySet()) {
