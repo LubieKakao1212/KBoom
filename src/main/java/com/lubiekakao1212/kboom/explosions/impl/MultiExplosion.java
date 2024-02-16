@@ -1,70 +1,47 @@
 package com.lubiekakao1212.kboom.explosions.impl;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.lubiekakao1212.kboom.explosions.ExplosionProperties;
-import com.lubiekakao1212.kboom.explosions.ExplosionTypeSource;
-import com.lubiekakao1212.kboom.explosions.IExplosionType;
-import com.lubiekakao1212.kboom.registry.KBoomRegistries;
-import com.lubiekakao1212.kboom.resource.ExplosionTypeManager;
-import com.lubiekakao1212.kboom.resource.KBoomConstants;
+import com.lubiekakao1212.kboom.explosions.ExplosionReference;
+import com.lubiekakao1212.kboom.explosions.IExplosion;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class MultiExplosion implements IExplosionType {
+public class MultiExplosion implements IExplosion {
 
     @SerializedName("list")
-    private List<Identifier> subExplosionIds;
+    private List<ExplosionReference> subExplosions;
 
     private ExplosionProperties.Overrides overrides = new ExplosionProperties.Overrides();
-
-    private transient List<IExplosionType> subExplosions = new ArrayList<>();
 
     @Override
     public void explode(ServerWorld world, Vector3d position, ExplosionProperties props) {
         props = overrides.apply(props);
         for(var explosion : subExplosions) {
-            explosion.explode(world, position, props);
+            explosion.get().explode(world, position, props);
         }
     }
 
     /**
      * Finalizes and validates its data after deserialization
      * @throws IllegalArgumentException when given instance has corrupted data
-     * @implNote Don't load ExplosionTypes in this method, instead use {@linkplain IExplosionType#loadDependencies(ImmutableMap)} ()} together with {@link #getDependencies()}
+     * @implNote Don't load ExplosionTypes in this method, instead use {@link #getDependencies()}
      */
     @Override
     public void initialize() {
-        //TODO
-        //hmm...
-        //Can't load subExplosionsHere since they are not loaded yet
-        //Do a topo sort?
-        /*for(var id : subExplosionIds) {
-            if(expl == null) {
-
-            }
-        }*/
+        subExplosions.forEach(ExplosionReference::initializeEmbedded);
     }
 
     @Override
     public List<Identifier> getDependencies() {
-        return subExplosionIds;
-    }
-
-    @Override
-    public void loadDependencies(ImmutableMap<Identifier, IExplosionType> registry) {
-        for(var id : subExplosionIds) {
-            var explosion = registry.get(id);
-            //No need for null check, we are ensured by the dependency sorter that this is correct
-            /*if(explosion == null) {
-                throw new IllegalArgumentException("Invalid explosion type: " + id);
-            }*/
-            subExplosions.add(explosion);
-        }
+        return subExplosions.stream().<Identifier>mapMulti(
+                (ref, consumer) -> ref.getDependencies().forEach(consumer)
+        ).collect(Collectors.toList());
     }
 }

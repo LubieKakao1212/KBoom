@@ -3,7 +3,7 @@ package com.lubiekakao1212.kboom.explosions.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.annotations.SerializedName;
 import com.lubiekakao1212.kboom.explosions.ExplosionProperties;
-import com.lubiekakao1212.kboom.explosions.IExplosionType;
+import com.lubiekakao1212.kboom.explosions.IExplosion;
 import com.lubiekakao1212.qulib.raycast.RaycastUtilKt;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import static com.lubiekakao1212.kboom.util.ExplosionUtil.*;
 
-public class RaySphereExplosion implements IExplosionType {
+public class RaySphereExplosion implements IExplosion {
 
     @SerializedName("sphere-size")
     private float sphereSize = 8.5f;
@@ -91,7 +91,7 @@ public class RaySphereExplosion implements IExplosionType {
      * Finalizes and validates its data after deserialization
      *
      * @throws IllegalArgumentException when given instance has corrupted data
-     * @implNote Don't load ExplosionTypes in this method, instead use {@linkplain IExplosionType#loadDependencies(ImmutableMap)} together with {@link #getDependencies()}
+     * @implNote Don't load ExplosionTypes in this method, instead use {@link #getDependencies()}
      */
     @Override
     public void initialize() {

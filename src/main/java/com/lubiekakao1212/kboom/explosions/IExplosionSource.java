@@ -4,10 +4,10 @@ import com.google.gson.JsonObject;
 import com.lubiekakao1212.kboom.KBoom;
 
 @FunctionalInterface
-public interface ExplosionTypeSource {
-    IExplosionType createExplosionType(JsonObject serialized);
+public interface IExplosionSource {
+    IExplosion createExplosionType(JsonObject serialized);
 
-    static ExplosionTypeSource defaultFor(Class<? extends IExplosionType> clazz) {
+    static IExplosionSource defaultFor(Class<? extends IExplosion> clazz) {
         return (json) -> KBoom.GSON.fromJson(json, clazz);
     }
 

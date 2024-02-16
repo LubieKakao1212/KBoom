@@ -2,10 +2,8 @@ package com.lubiekakao1212.kboom.explosions.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.annotations.SerializedName;
-import com.lubiekakao1212.kboom.KBoom;
 import com.lubiekakao1212.kboom.explosions.ExplosionProperties;
-import com.lubiekakao1212.kboom.explosions.IExplosionType;
-import net.minecraft.block.Block;
+import com.lubiekakao1212.kboom.explosions.IExplosion;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.joml.Vector3d;
@@ -14,7 +12,7 @@ import java.util.*;
 
 import static com.lubiekakao1212.kboom.util.ExplosionUtil.*;
 
-public class DeleteSphereExplosion implements IExplosionType {
+public class DeleteSphereExplosion implements IExplosion {
 
     private ExplosionProperties.Overrides overrides;
 
@@ -72,7 +70,7 @@ public class DeleteSphereExplosion implements IExplosionType {
     /**
      * Finalizes and validates its data after deserialization
      * @throws IllegalArgumentException when given instance has corrupted data
-     * @implNote Don't load ExplosionTypes in this method, instead use {@linkplain IExplosionType#loadDependencies(ImmutableMap)} ()} together with {@link #getDependencies()}
+     * @implNote Don't load ExplosionTypes in this method, instead use {@link #getDependencies()}
      */
     @Override
     public void initialize() {

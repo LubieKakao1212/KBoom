@@ -8,14 +8,14 @@ import org.joml.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface IExplosionType {
+public interface IExplosion {
 
     void explode(ServerWorld world, Vector3d position, ExplosionProperties props);
 
     /**
      * Finalizes and validates its data after deserialization
      * @throws IllegalArgumentException when given instance has corrupted data
-     * @implNote Don't load ExplosionTypes in this method, instead use {@linkplain IExplosionType#loadDependencies(ImmutableMap)} ()} together with {@link #getDependencies()}
+     * @implNote Don't load ExplosionTypes in this method, instead use {@link #getDependencies()}
      */
     void initialize();
 
@@ -27,5 +27,5 @@ public interface IExplosionType {
     /**
      * @implSpec Use this to convert your IExplosionType instances
      */
-    default void loadDependencies(ImmutableMap<Identifier, IExplosionType> registry) { }
+    //default void loadDependencies(ImmutableMap<Identifier, IExplosion> registry) { }
 }

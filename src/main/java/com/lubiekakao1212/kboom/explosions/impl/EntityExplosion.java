@@ -3,7 +3,7 @@ package com.lubiekakao1212.kboom.explosions.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.annotations.SerializedName;
 import com.lubiekakao1212.kboom.explosions.ExplosionProperties;
-import com.lubiekakao1212.kboom.explosions.IExplosionType;
+import com.lubiekakao1212.kboom.explosions.IExplosion;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.nbt.NbtCompound;
@@ -11,7 +11,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
 
@@ -19,7 +18,7 @@ import java.util.Random;
 
 import static java.lang.Math.*;
 
-public class EntityExplosion implements IExplosionType {
+public class EntityExplosion implements IExplosion {
 
     @SerializedName("entity-type")
     private Identifier entityTypeId;
@@ -59,7 +58,7 @@ public class EntityExplosion implements IExplosionType {
     /**
      * Finalizes and validates its data after deserialization
      * @throws IllegalArgumentException when given instance has corrupted data
-     * @implNote Don't load ExplosionTypes in this method, instead use {@linkplain IExplosionType#loadDependencies(ImmutableMap)} ()} together with {@link #getDependencies()}
+     * @implNote Don't load ExplosionTypes in this method, instead use {@link #getDependencies()}
      */
     @Override
     public void initialize() {
