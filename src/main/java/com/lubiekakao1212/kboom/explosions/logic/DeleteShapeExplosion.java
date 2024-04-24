@@ -1,33 +1,37 @@
-package com.lubiekakao1212.kboom.explosions.impl;
+package com.lubiekakao1212.kboom.explosions.logic;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.annotations.SerializedName;
 import com.lubiekakao1212.kboom.explosions.ExplosionProperties;
 import com.lubiekakao1212.kboom.explosions.IExplosion;
+import com.lubiekakao1212.kboom.util.Shape;
+import com.lubiekakao1212.qulib.math.mc.Vector3m;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-import org.joml.Vector3d;
 
 import java.util.*;
 
 import static com.lubiekakao1212.kboom.util.ExplosionUtil.*;
 
-public class DeleteSphereExplosion implements IExplosion {
+public class DeleteShapeExplosion implements IExplosion {
 
     private ExplosionProperties.Overrides overrides;
 
     @SerializedName("drop-chance")
-    private float dropChance;
+    private float dropChance = 0f;
 
-    private transient Random random = new Random();
+    @SerializedName("shape")
+    private Shape shape = Shape.SPHERE;
+
+    @SerializedName("max-resistance")
+    private float maxResistance = 10;
+
+    private final transient Random random = new Random();
 
     @Override
-    public void explode(ServerWorld world, Vector3d position, ExplosionProperties props) {
+    public void explode(ServerWorld world, Vector3m position, ExplosionProperties props) {
         props = overrides.apply(props);
 
         var radius = props.power();
-
-        var radiusSq = radius * radius;
 
         var x = position.x;
         var y = position.y;
@@ -44,7 +48,12 @@ public class DeleteSphereExplosion implements IExplosion {
         BlockPos pos = null;
 
         while((pos = queue.poll()) != null) {
-            if(pos.getSquaredDistanceFromCenter(x, y, z) > radiusSq) {
+
+            var delta = pos.subtract(origin);
+            if(shape.getDistanceFunction().getDistanceToCenter(delta) > radius) {
+                continue;
+            }
+            if(world.getBlockState(pos).getBlock().getBlastResistance() > maxResistance) {
                 continue;
             }
 
@@ -65,8 +74,6 @@ public class DeleteSphereExplosion implements IExplosion {
     }
 
 
-
-
     /**
      * Finalizes and validates its data after deserialization
      * @throws IllegalArgumentException when given instance has corrupted data
@@ -74,6 +81,8 @@ public class DeleteSphereExplosion implements IExplosion {
      */
     @Override
     public void initialize() {
-
+        if(shape == null) {
+            throw new IllegalArgumentException("JSON field \"shape\" has an invalid value");
+        }
     }
 }

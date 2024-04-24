@@ -1,6 +1,7 @@
 package com.lubiekakao1212.kboom.explosions;
 
 import com.google.common.collect.ImmutableMap;
+import com.lubiekakao1212.qulib.math.mc.Vector3m;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import org.joml.Vector3d;
@@ -10,12 +11,12 @@ import java.util.List;
 
 public interface IExplosion {
 
-    void explode(ServerWorld world, Vector3d position, ExplosionProperties props);
+    void explode(ServerWorld world, Vector3m position, ExplosionProperties props);
 
     /**
      * Finalizes and validates its data after deserialization
      * @throws IllegalArgumentException when given instance has corrupted data
-     * @implNote Don't load ExplosionTypes in this method, instead use {@link #getDependencies()}
+     * @implNote Don't load {@link ExplosionReference}s in this method, instead use {@link #getDependencies()}
      */
     void initialize();
 

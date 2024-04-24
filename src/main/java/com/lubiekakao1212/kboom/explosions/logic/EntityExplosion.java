@@ -1,9 +1,9 @@
-package com.lubiekakao1212.kboom.explosions.impl;
+package com.lubiekakao1212.kboom.explosions.logic;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.annotations.SerializedName;
 import com.lubiekakao1212.kboom.explosions.ExplosionProperties;
 import com.lubiekakao1212.kboom.explosions.IExplosion;
+import com.lubiekakao1212.qulib.math.mc.Vector3m;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.nbt.NbtCompound;
@@ -34,7 +34,7 @@ public class EntityExplosion implements IExplosion {
     private final transient Random random = new Random();
 
     @Override
-    public void explode(ServerWorld world, Vector3d position, @NotNull ExplosionProperties properties) {
+    public void explode(ServerWorld world, Vector3m position, @NotNull ExplosionProperties properties) {
         var props = overrides.apply(properties);
 
         var power = props.power();

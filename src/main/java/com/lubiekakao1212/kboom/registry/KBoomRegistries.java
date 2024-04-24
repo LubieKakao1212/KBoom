@@ -2,10 +2,10 @@ package com.lubiekakao1212.kboom.registry;
 
 import com.lubiekakao1212.kboom.KBoom;
 import com.lubiekakao1212.kboom.explosions.IExplosionSource;
-import com.lubiekakao1212.kboom.explosions.impl.DeleteSphereExplosion;
-import com.lubiekakao1212.kboom.explosions.impl.EntityExplosion;
-import com.lubiekakao1212.kboom.explosions.impl.MultiExplosion;
-import com.lubiekakao1212.kboom.explosions.impl.RaySphereExplosion;
+import com.lubiekakao1212.kboom.explosions.logic.DeleteShapeExplosion;
+import com.lubiekakao1212.kboom.explosions.logic.EntityExplosion;
+import com.lubiekakao1212.kboom.explosions.MultiExplosion;
+import com.lubiekakao1212.kboom.explosions.logic.RayExplosion;
 import com.lubiekakao1212.kboom.resource.ExplosionTypeManager;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
@@ -19,18 +19,18 @@ public class KBoomRegistries {
 
     public static final ExplosionTypeManager EXPLOSIONS = new ExplosionTypeManager();
 
-    public static final Registry<IExplosionSource> EXPLOSION_SOURCES = FabricRegistryBuilder.createDefaulted(EXPLOSION_SOURCES_KEY, new Identifier("minecraft","explosion"))
+    public static final Registry<IExplosionSource> EXPLOSION_SOURCES = FabricRegistryBuilder.createSimple(EXPLOSION_SOURCES_KEY)
             .attribute(RegistryAttribute.SYNCED)
             .buildAndRegister();
 
     public static void init() {
         //Temporary
-        Registry.register(EXPLOSION_SOURCES, new Identifier("minecraft","explosion"), IExplosionSource.defaultFor(EntityExplosion.class));
+        //Registry.register(EXPLOSION_SOURCES, new Identifier("minecraft","explosion"), IExplosionSource.defaultFor(EntityExplosion.class));
 
         Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","entity"), IExplosionSource.defaultFor(EntityExplosion.class));
         Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","multi-explosion"), IExplosionSource.defaultFor(MultiExplosion.class));
-        Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","delete-sphere"), IExplosionSource.defaultFor(DeleteSphereExplosion.class));
-        Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","ray-sphere"), IExplosionSource.defaultFor(RaySphereExplosion.class));
+        Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","delete-shape"), IExplosionSource.defaultFor(DeleteShapeExplosion.class));
+        Registry.register(EXPLOSION_SOURCES, new Identifier("kboom","ray-sphere"), IExplosionSource.defaultFor(RayExplosion.class));
     }
 
     public static class EntryIds {
