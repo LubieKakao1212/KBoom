@@ -3,6 +3,12 @@ plugins {
 	id 'maven-publish'
 }
 
+//Load Access Properties (ghReadPAT, ghUsr)
+ext.accessProps = new Properties()
+file("access.properties").withInputStream {
+	accessProps.load(it)
+}
+
 version = project.mod_version
 group = project.maven_group
 
@@ -17,8 +23,17 @@ repositories {
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
 
-	maven {
+	/*maven {
 		url "file://${mavenLocal}"
+	}*/
+
+	maven {
+		name = "GitHubPackages QuLib"
+		url = uri("https://maven.pkg.github.com/LubieKakao1212/qulib-kt")
+		credentials {
+			username = accessProps.ghUsr
+			password = accessProps.ghReadPAT
+		}
 	}
 
 }
@@ -45,7 +60,8 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
-	modImplementation "com.lubiekakao1212:qulib-fabric:${project.minecraft_version}-${project.qulib_version}"
+	//modImplementation "com.lubiekakao1212:qulib-fabric:${project.minecraft_version}-${project.qulib_version}"
+	modImplementation "com.LubieKakao1212.qulib:qulib-kt-fabric-${minecraft_version}:${qulib_version}"
 
 	// Uncomment the following line to enable the deprecated Fabric API modules. 
 	// These are included in the Fabric API production distribution and allow you to update your mod to the latest modules at a later more convenient time.

@@ -24,9 +24,4 @@ public interface IExplosion {
      * @return A list of all explosion types that are required to be loaded before this explosion type
      */
     default List<Identifier> getDependencies() { return new ArrayList<>(); }
-
-    /**
-     * @implSpec Use this to convert your IExplosionType instances
-     */
-    //default void loadDependencies(ImmutableMap<Identifier, IExplosion> registry) { }
 }

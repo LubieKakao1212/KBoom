@@ -4,6 +4,10 @@ import com.google.gson.annotations.SerializedName;
 import com.lubiekakao1212.kboom.explosions.ExplosionProperties;
 import com.lubiekakao1212.kboom.explosions.ExplosionReference;
 import com.lubiekakao1212.kboom.explosions.IExplosion;
+import com.lubiekakao1212.kboom.util.DoubleRef;
+import com.lubiekakao1212.kboom.util.ExplosionUtil;
+import com.lubiekakao1212.kboom.util.RayProperties;
+import com.lubiekakao1212.kboom.util.Validation;
 import com.lubiekakao1212.qulib.math.mc.Vector3m;
 import com.lubiekakao1212.qulib.random.RandomEx;
 import com.lubiekakao1212.qulib.raycast.RaycastHit;
@@ -12,6 +16,7 @@ import com.lubiekakao1212.qulib.raycast.config.RaycastResultConfig;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import org.joml.Vector3d;
@@ -27,15 +32,6 @@ public class RayExplosion implements IExplosion {
     @SerializedName("sphere-size")
     private float sphereSize = 8.5f;
 
-    @SerializedName("penetration")
-    private float penetration = 1f;
-
-    @SerializedName("penetration-noise")
-    private float penertationNoise = 0f;
-
-    @SerializedName("natural-decay")
-    private float naturalDecay = 1f / 16f;
-
     @SerializedName("drop-chance")
     private float dropChance = 0f;
 
@@ -44,6 +40,9 @@ public class RayExplosion implements IExplosion {
 
     @SerializedName("entity-behaviour")
     private EntityBehaviour entityBehaviour = null;
+
+    @SerializedName("ray")
+    private RayProperties rayProperties = null;
 
     private ExplosionProperties.Overrides overrides = new ExplosionProperties.Overrides();
 
@@ -59,10 +58,9 @@ public class RayExplosion implements IExplosion {
         var doBlockDamage = props.destroyBlocks();
 
         var damagedBlocks = new HashMap<BlockPos, Double>();
-        var damagedEntities = new HashMap<Entity, Double>();
+        var damagedEntities = new HashMap<Entity, Pair<Double, Integer>>();
 
-        var maxDistance = props.power() / naturalDecay;
-        var maxRadius = maxDistance * 2;
+        var maxDistance = rayProperties.maxDistanceForPower(props.power());
 
         var shouldAffectEntities = entityBehaviour != null;
 
@@ -71,32 +69,31 @@ public class RayExplosion implements IExplosion {
             entities = world.getNonSpectatingEntities(Entity.class,
                     Box.of(
                             position.toVec3d(),
-                            maxRadius, maxRadius, maxRadius
+                            maxDistance, maxDistance, maxDistance
                     ));
         }
 
         for(var dir : prepareRays(randomizeDirection)) {
-            double[] rayPower = new double[] { props.power() };
+            DoubleRef rayPower = new DoubleRef(props.power());
 
             var entityQueue = doEntityRaycast(entities, position, dir, maxDistance);
 
             RaycastUtilKt.raycastGridUntil(position, dir, Double.POSITIVE_INFINITY, true, (hit) -> {
                 handleEntities(rayPower, damagedEntities, entityQueue, hit);
-                return handleBlock(world, rayPower, damagedBlocks, hit);
+                return ExplosionUtil.handleRayBlockDamage(world, random, rayProperties, rayPower, damagedBlocks, hit);
             });
         }
 
 
         for (var entityEntry : damagedEntities.entrySet()) {
             var entity = entityEntry.getKey();
-            var exposure = (double)entityEntry.getValue();
 
+            var exposure = calculateExposure(entityEntry.getValue());
             var ePos = entity.getPos();
 
             //Don't need to check for shouldAffectEntities, damagedEntities would be empty
             //We divide by 20 so it represents blocks/s and not blocks/t
-            //We also divide by the ray count
-            entity.addVelocity(ePos.subtract(position.toVec3d()).normalize().multiply(exposure * entityBehaviour.knockback / 20.0));
+            entity.addVelocity(ePos.subtract(position.toVec3d()).normalize().multiply(exposure * entityBehaviour.knockbackMul / 20.0));
             
             if(doEntityDamage) {
                 entity.damage(props.damageSource(), (float)exposure * entityBehaviour.damageMul);
@@ -121,37 +118,7 @@ public class RayExplosion implements IExplosion {
         return new ArrayDeque<>(entityRaycast);
     }
 
-    private boolean handleBlock(ServerWorld world, double[] rayPower, HashMap<BlockPos, Double> damagedBlocks, RaycastHit<Vector3i> hit) {
-        var pos = hit.getTarget();
-
-        if(pos.y < world.getBottomY() || pos.y > world.getTopY()) {
-            return false;
-        }
-
-        var intersection = hit.getIntersection();
-        var intersectionDistance = intersection.getDistanceMax() - intersection.getDistanceMin();
-        var bPos = new BlockPos(pos.x, pos.y, pos.z);
-        var resistanceTotal = world.getBlockState(bPos).getBlock().getBlastResistance();
-        var resistanceScaled = resistanceTotal * intersectionDistance;
-
-        var damage = intersectionDistance * rayPower[0];
-        rayPower[0] -= resistanceScaled / penetration * random.randomScaleLinear(penertationNoise);
-        if(rayPower[0] <= 0) {
-            //we want to offset the damage dealt by the overused power
-            //ray power is negative, so we add instead of subtracting
-            damage += rayPower[0];
-        }
-
-        var blockHealth = damagedBlocks.getOrDefault(bPos, (double)resistanceTotal);
-        blockHealth -= damage;
-        damagedBlocks.put(bPos, blockHealth);
-
-        rayPower[0] -= naturalDecay * intersectionDistance;
-
-        return rayPower[0] > 0;
-    }
-
-    private void handleEntities(double[] rayPower, HashMap<Entity, Double> damagedEntities, Queue<RaycastHit<Entity>> entityQueue, RaycastHit<Vector3i> blockHit) {
+    private void handleEntities(DoubleRef rayPower, HashMap<Entity, Pair<Double, Integer>> damagedEntities, Queue<RaycastHit<Entity>> entityQueue, RaycastHit<Vector3i> blockHit) {
         var entityHit = entityQueue.peek();
         while(entityHit != null) {
             var entityNear = entityHit.getIntersection().getDistanceMin();
@@ -161,12 +128,18 @@ public class RayExplosion implements IExplosion {
             }
             entityQueue.remove();
             var entity = entityHit.getTarget();
-            var currentDamage = damagedEntities.get(entity);
-            var damageDealt = rayPower[0];
-            if(currentDamage != null) {
-                damageDealt += currentDamage;
+            var entry = damagedEntities.get(entity);
+
+            if(entry == null) {
+                entry = new Pair<>(rayPower.value,1);
+                damagedEntities.put(entity, entry);
+            } else
+            {
+                var damageDealt = entry.getLeft() + rayPower.value;
+                var rays = entry.getRight() + 1;
+                entry.setLeft(damageDealt);
+                entry.setRight(rays);
             }
-            damagedEntities.put(entity, damageDealt);
             entityHit = entityQueue.peek();
         }
     }
@@ -178,6 +151,8 @@ public class RayExplosion implements IExplosion {
      */
     @Override
     public void initialize() {
+        Validation.requiredProperty(rayProperties, "ray");
+
         var queue = new ArrayDeque<BlockPos>();
         var visited = new HashSet<BlockPos>();
         rayDirections = new HashSet<>();
@@ -228,12 +203,20 @@ public class RayExplosion implements IExplosion {
         return stream.collect(Collectors.toList());
     }
 
+    private double calculateExposure(Pair<Double, Integer> entry) {
+        var rawExposure = entry.getLeft();
+        var rayCount = entry.getRight();
+        return rawExposure * Math.pow(rayCount, entityBehaviour.rayCountExponent) / rayCount;
+    }
+
+
     public static class EntityBehaviour {
 
         @SerializedName("damage-multiplier")
         public float damageMul = 1f;
 
-        public float knockback = 0f;
+        @SerializedName("knockback-multiplier")
+        public float knockbackMul = 0f;
 
         @SerializedName("ray-count-exponent")
         public float rayCountExponent = 0.5f;
